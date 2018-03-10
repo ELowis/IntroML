@@ -4,7 +4,7 @@
 # data and compare them to the given output. 
 # The resulting RMSE should be 0, since there is no noise. 
 import csv
-from sklearn.metrics import mean_squared_error
+
 
 train_file = 'train.csv'
 result_file = 'train_results.csv'
