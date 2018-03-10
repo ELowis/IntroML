@@ -5,8 +5,8 @@ import csv
 # can then be used to evaluate the accuracy 
 # using `evaluate.py`
 
-#test_file = 'train.csv'
-#result_file = 'train_results.csv' 
+# test_file = 'train.csv'
+# result_file = 'train_results.csv'
 
 # Use the following settings to generate
 # estimates for the testing data (this is the wanted result)
@@ -15,7 +15,7 @@ result_file = 'results.csv'
 
 
 with open(test_file, 'r') as csv_test:
-    with open(result_file, 'w+') as csv_results:
+    with open(result_file, 'w+', newline='') as csv_results:
         csv_reader = csv.DictReader(csv_test)
         csv_writer = csv.DictWriter(csv_results, fieldnames = ['Id', 'y'])
         
