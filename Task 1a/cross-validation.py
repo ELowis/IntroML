@@ -5,12 +5,12 @@ from sklearn import linear_model, preprocessing, metrics
 csv = np.loadtxt('train.csv', delimiter=',', skiprows=1)
 id = csv[:, 0]
 y = csv[:, 1]
-x = csv[:, 2:12]
+xs = csv[:, 2:len(csv[0])]
 N = id.size
 
 # Preprocess data
 y = preprocessing.scale(y)
-x = preprocessing.scale(x)
+xs = preprocessing.scale(xs)
 
 lambdas = np.array([0.1, 1, 10, 100, 1000])
 RMSEs = np.array([])
@@ -24,12 +24,12 @@ for l in lambdas:
     Y_pred = np.array([])
 
     for i in range(folds):
-        x_test = x[n*i : n*(i+1)]
+        x_test = xs[n*i : n*(i+1)]
         y_test = y[n*i : n*(i+1)]
         assert x_test.shape == (n, 10)
         assert y_test.shape == (n, )
 
-        x_train = np.concatenate([x[0 : n*i], x[n*(i+1) : N]])
+        x_train = np.concatenate([xs[0 : n*i], xs[n*(i+1) : N]])
         y_train = np.concatenate([y[0 : n*i], y[n*(i+1) : N]])
         assert x_train.shape == (N-n, 10)
         assert y_train.shape == (N-n, )
