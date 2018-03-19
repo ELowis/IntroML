@@ -24,12 +24,12 @@ for l in lambdas:
     Y_pred = np.array([])
 
     for i in range(folds):
-        xs_test = xs[n*i: n*(i+1)]
-        y_test = y[n*i: n*(i+1)]
+        xs_test = xs[n*i : n*(i+1)]
+        y_test = y[n*i : n*(i+1)]
         assert xs_test.shape == (n, 10)
         assert y_test.shape == (n, )
 
-        xs_train = np.concatenate([xs[0 : n*i], xs[n*(i+1) : N]])  # what happens for i=0/i=9?
+        xs_train = np.concatenate([xs[0 : n*i], xs[n*(i+1) : N]])
         y_train = np.concatenate([y[0 : n*i], y[n*(i+1) : N]])
         assert xs_train.shape == (N-n, 10)
         assert y_train.shape == (N-n, )
