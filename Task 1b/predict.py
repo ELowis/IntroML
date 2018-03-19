@@ -21,7 +21,7 @@ exponential = np.exp(X)
 cosine = np.cos(X)
 features = np.concatenate([linear, quadratic, exponential, cosine], axis=1)
 
-lambdas = np.array([0.1, 1, 10, 100, 1000])
+lambdas = np.array([0.001, 0.01, 0.1, 1, 10, 100]) # 1000 takes too long
 regressions = np.array([])
 errors = np.array([])
 
@@ -29,7 +29,7 @@ for l in lambdas:
     print('Performing cross-validation for lambda = ' + str(l) + ' ...')
     regression = svm.SVR(kernel='linear', C=l)
     # Use MSE instead of RMSE since only comparison matters
-    scores = model_selection.cross_val_score(regression, X, y, cv=3, scoring='neg_mean_squared_error')
+    scores = model_selection.cross_val_score(regression, features, y, cv=5, scoring='neg_mean_squared_error')
     regressions = np.append(regressions, regression)
     RMSE = (-np.mean(scores)) ** 0.5
 
