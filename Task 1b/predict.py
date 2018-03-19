@@ -42,9 +42,12 @@ for i in range(errors.size):
     if errors[i] == min_error:
         best_regr = regressions[i]
 
-best_regr.fit(X, y)
+best_regr.fit(features, y)
         
 with open('res.csv', 'w+') as res_file:
-    res = "\n".join(map(str, best_regr.coef_.tolist()))
-    print(res)
-    res_file.write(res)
+    intercept = best_regr.intercept_[0]
+    l = best_regr.coef_[0].tolist()
+    m = map(str, l)
+    sl = list(m)
+    weights = '\n'.join(sl + [str(intercept)])
+    res_file.write(weights)
