@@ -11,16 +11,16 @@ from sklearn import linear_model, preprocessing, metrics
 csv = np.loadtxt('train.csv', delimiter=',', skiprows=1)
 id = csv[:, 0]
 y = csv[:, 1]
-x = csv[:, 2:8]
+xs = csv[:, 2:len(csv[0])]
 N = id.size
 
 # Construct feature vector
-linear = x
-quadratic = np.square(x)
-exponential = np.exp(x)
-cosine = np.cos(x)
-non-constant = np.concate([linear, quadratic, exponential, cosine], axis=1)
-non-constant = preprocessing.scale(non-constant)
+linear = xs
+quadratic = np.square(xs)
+exponential = np.exp(xs)
+cosine = np.cos(xs)
+non_constant = np.concate([linear, quadratic, exponential, cosine], axis=1)
+non_constant = preprocessing.scale(non_constant)
 
 constant = np.ones(shape=(N,1))
 features = np.concatenate([non-constant, constant], axis=1)
