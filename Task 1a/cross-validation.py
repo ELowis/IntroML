@@ -9,8 +9,8 @@ xs = csv[:, 2:len(csv[0])]
 N = id.size
 
 # Preprocess data
-y = preprocessing.scale(y)
-xs = preprocessing.scale(xs)
+#y = preprocessing.scale(y)
+#xs = preprocessing.scale(xs)
 
 lambdas = np.array([0.1, 1, 10, 100, 1000])
 RMSEs = np.array([])
