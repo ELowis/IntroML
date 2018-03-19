@@ -24,20 +24,20 @@ for l in lambdas:
     Y_pred = np.array([])
 
     for i in range(folds):
-        x_test = xs[n*i : n*(i+1)]
-        y_test = y[n*i : n*(i+1)]
-        assert x_test.shape == (n, 10)
+        xs_test = xs[n*i: n*(i+1)]
+        y_test = y[n*i: n*(i+1)]
+        assert xs_test.shape == (n, 10)
         assert y_test.shape == (n, )
 
-        x_train = np.concatenate([xs[0 : n*i], xs[n*(i+1) : N]])
+        xs_train = np.concatenate([xs[0 : n*i], xs[n*(i+1) : N]])  # what happens for i=0/i=9?
         y_train = np.concatenate([y[0 : n*i], y[n*(i+1) : N]])
-        assert x_train.shape == (N-n, 10)
+        assert xs_train.shape == (N-n, 10)
         assert y_train.shape == (N-n, )
 
         # Train with Ridge regression
         ridge = linear_model.Ridge(alpha=l)
-        ridge.fit(x_train, y_train)
-        y_pred = ridge.predict(x_test)
+        ridge.fit(xs_train, y_train)
+        y_pred = ridge.predict(xs_test)
         assert y_test.shape == y_pred.shape
 
         # Store results
