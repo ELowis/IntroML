@@ -23,6 +23,8 @@ for l in lambdas:
     Y_test = np.array([])
     Y_pred = np.array([])
 
+    RMSE_sum = 0
+
     for i in range(folds):
         xs_test = xs[n*i : n*(i+1)]
         y_test = y[n*i : n*(i+1)]
@@ -40,16 +42,13 @@ for l in lambdas:
         y_pred = ridge.predict(xs_test)
         assert y_test.shape == y_pred.shape
 
-        # Store results
-        Y_test = np.append(Y_test, y_test)
-        Y_pred = np.append(Y_pred, y_pred)
+        # Evaluate results
+        RMSE_sum = RMSE_sum + metrics.mean_squared_error(y_test, y_pred) ** 0.5
 
-    # Evaluate results
-    assert Y_test.shape == (N, )
-    assert Y_pred.shape == (N, )
-    RMSE = metrics.mean_squared_error(Y_test, Y_pred) ** 0.5
-    print('\tRMSE = ' + str(RMSE))
-    RMSEs = np.append(RMSEs, str(RMSE))
+    # Compute average RMSE over all folds
+    RMSE_avg = RMSE_sum / folds         # maybe more precise averaging using library function?
+    print('\tRMSE = ' + str(RMSE_avg))
+    RMSEs = np.append(RMSEs, str(RMSE_avg))
         
 with open('res.csv', 'w+') as res_file:
     res = '\n'.join(RMSEs)
