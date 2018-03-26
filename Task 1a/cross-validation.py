@@ -1,6 +1,5 @@
 import numpy as np
-import sklearn
-from sklearn import linear_model, preprocessing, metrics
+from sklearn import linear_model, metrics
 
 csv = np.loadtxt('train.csv', delimiter=',', skiprows=1)
 id = csv[:, 0]
