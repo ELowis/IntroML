@@ -1,6 +1,8 @@
 import numpy as np
 import sklearn
 from sklearn import linear_model, svm, neighbors, metrics, model_selection
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 
 ####################################################
@@ -17,14 +19,16 @@ n = id.size
 # Constants
 RIDGE = 'Ridge'
 RBF = 'RBF kernel'
+POLY = 'Polynomial kernel'
 NN = 'Nearest Neighbors'
-folds = 5
+folds = 10
 
 penalties = [10 ** i for i in range(-3, 4)] # 1e^-3 ... 1e^3
-bandwidths = [10 ** i for i in range(-3, 4)] # 1e^-3 ... 1e^3
+bandwidths = [10 ** i for i in range(-5, 4)] # 1e^-5 ... 1e^3
+degrees = []#3*i+1 for i in range(1, 10)]
 k_neighbors = [2*i + 1 for i in range(0, 25)] # Odd numbers from 1 to 49
 classifiers = {}
-errors = {}
+accuracies = {}
 
 # Returns a string describing a classifier
 def format_info(name, params):
@@ -33,51 +37,68 @@ def format_info(name, params):
         res += ", C = " + str(params[0])
     if name == RBF:
         res += ", C = " + str(params[0]) + ", gamma = " + str(params[1])
+    if name == POLY:
+        res += ", C = " + str(params[0]) + ", gamma = " + str(params[1]) + ", degree = " + str(params[2])
     if name == NN:
         res += ", k = " + str(params[0])
     return res
 
 # Build Classifiers
+
 for C in penalties:
     # Add Ridge Classifier (One vs Rest approach)
     classifiers[RIDGE, (C,)] = linear_model.RidgeClassifier(alpha=C)
 
-    # Add RBF SVM Classifiers (One vs Rest approach)
     for gamma in bandwidths:
+        # Add RBF SVM Classifiers (One vs One approach)
         classifiers[RBF, (C, gamma)] = svm.SVC(
-            C=C, 
-            kernel='rbf', 
+            kernel='rbf',
+            C=C,  
             gamma=gamma, 
-            decision_function_shape='ovr')
+            decision_function_shape='ovo')
+        
+        # Add Polynomial SVM Classifier (One vs One approach)
+        for d in degrees:
+            classifiers[POLY, (C, gamma, d)] = svm.SVC(
+                kernel='poly',
+                C=C,
+                gamma=gamma,
+                degree=d,
+                decision_function_shape='ovo')
 
 # Add k-Nearest Neighbors classifiers
 for k in k_neighbors: 
     classifiers[NN, (k,)] = neighbors.KNeighborsClassifier(n_neighbors=k, weights='distance')
-
 
 # Perform Cross-Validation
 for key in classifiers:
     name, params = key
     print("Performing " + str(folds) + "-fold CV for " + format_info(name, params) + " ...", end='')
     classifier = classifiers[key]
-    #TODO: Use RMSE or accuracy as metric?
+
+    # Add a data preprocesing step before classification
+    classifier = make_pipeline(StandardScaler(), classifier)
+    classifiers[key] = classifier #Replace classifier
+
     scores = model_selection.cross_val_score(
         classifier, 
         X, 
         y, 
         cv=folds, 
-        scoring='neg_mean_squared_error')
-    RMSE = (-np.mean(scores)) ** 0.5
+        scoring='accuracy',
+        n_jobs=-1) # use all CPUs
+    mean_acc = np.mean(scores)
 
-    print("\tRMSE = " + str(RMSE))
-    errors[key] = RMSE
+    print("\tMean Accuracy = " + str(mean_acc))
+    accuracies[key] = mean_acc
 
-# Find min error
-best_name, best_params = min(errors, key=errors.get)
-best_regr = classifiers[best_name, best_params]
+# Find best classifier
+best_name, best_params = max(accuracies, key=accuracies.get)
+best_classifier = classifiers[best_name, best_params]
 
-print("\n" + "Best regression for the data: " + format_info(best_name, best_params))
-best_regr.fit(X, y)
+print("\n" + "Best regression for the data: " + format_info(best_name, best_params)
+        + "\tAccuracy: " + str(accuracies[best_name, best_params]))
+best_classifier.fit(X, y)
 
 
 #############################
@@ -92,7 +113,7 @@ n_test = id_test.size
 assert X_test.shape[1] == X.shape[1]
 
 # Predict
-y_pred = best_regr.predict(X_test)
+y_pred = best_classifier.predict(X_test)
 assert y_pred.shape == id_test.shape
 
 # Store
