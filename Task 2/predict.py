@@ -1,11 +1,14 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from sklearn import linear_model, svm, neighbors, metrics, model_selection
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-#from sklearn.metrics.pairwise import laplacian_kernel
+#from sklearn.gaussian_process.kernels import RBF as RBF_kernel
+from sklearn.metrics.pairwise import rbf_kernel, linear_kernel#laplacian_kernel
 # from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 # from collections import Counter
+from mpl_toolkits.mplot3d import Axes3D
 
 ####################################################
 # Perform Cross-Validation to find best classifier #
@@ -25,12 +28,13 @@ RIDGE = 'Ridge'
 RBF = 'RBF kernel'
 LAP = 'Laplacian kernel'
 POLY = 'Polynomial kernel'
+SEM = 'Semi-parametric kernel'
 NN = 'Nearest Neighbors'
 folds = 10
 
-penalties = [10 ** i for i in range(-3, 4)] # 1e^-3 ... 1e^3
+penalties = [10 ** i for i in range(-2, 4)] # 1e^-2 ... 1e^3
 bandwidths = [10 ** i for i in range(-5, 4)] # 1e^-5 ... 1e^3
-degrees = []#3*i+1 for i in range(1, 10)]
+degrees = []# 3*i+1 for i in range(1, 7)]
 k_neighbors = [2*i + 1 for i in range(0, 25)] # Odd numbers from 1 to 49
 classifiers = {}
 accuracies = {}
@@ -40,7 +44,7 @@ def format_info(name, params):
     res = name
     if name == RIDGE:
         res += ", C = " + str(params[0])
-    if name in {RBF, LAP}:
+    if name in {RBF, LAP, SEM}:
         res += ", C = " + str(params[0]) + ", gamma = " + str(params[1])
     if name == POLY:
         res += ", C = " + str(params[0]) + ", gamma = " + str(params[1]) + ", degree = " + str(params[2])
@@ -65,11 +69,16 @@ if __name__ == "__main__":      # for parallelism under windows
                 gamma=gamma,    # bandwidth
                 decision_function_shape='ovo')
 
-            # # Add Laplacian SVM Classifiers (One vs One approach)             # always giving Accuracy = 0.34349763744093603
+            # # Add Laplacian SVM Classifiers (One vs One approach)             # always giving Accuracy = 0.34349763744093603 -> almost random
             # classifiers[LAP, (C, gamma)] = svm.SVC(                           # need to turn off parallelism
             #     kernel=lambda X,Y: laplacian_kernel(X,Y, gamma),
             #     C=C,
             #     decision_function_shape='ovo')
+
+            classifiers[SEM, (C, gamma)] = svm.SVC(
+                kernel=lambda X,Y: rbf_kernel(X, Y, gamma) + linear_kernel(X,Y),
+                C=C,  # regularization -> SVM
+                decision_function_shape='ovo')
 
             # Add Polynomial SVM Classifier (One vs One approach)
             for d in degrees:
@@ -99,8 +108,8 @@ if __name__ == "__main__":      # for parallelism under windows
             X,
             y,
             cv=folds,
-            scoring='accuracy',
-            n_jobs=-1) # use all CPUs
+            scoring='accuracy')
+            #n_jobs=-1) # use all CPUs
         mean_acc = np.mean(scores)
 
         print("\tMean Accuracy = " + str(mean_acc))
@@ -141,4 +150,43 @@ if __name__ == "__main__":      # for parallelism under windows
         delimiter=',',
         header='Id,y',
         comments='')
+
+
+
+    # # Plot results
+    #
+    # colors = {RIDGE: 'grey', RBF: 'blue', POLY: 'green', NN: 'red'}
+    #
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    #
+    # ax.set_xscale('log')
+    # ax.set_yscale('linear')
+    # #ax.set_zscale('log')
+    # ax.set_xlabel("Regularization Parameter $C$")
+    # ax.set_ylabel("Root Mean Square Error")
+    # ax.set_zlabel("Bandwidth $\gamma$")
+    # ax.set_title("Prediction error for " + str(folds) + "-fold validation")
+    #
+    # plotted = set()  # Used to prevent multiple legend entries
+    # for key in classifiers:
+    #     name, params = key
+    #     if name in plotted:
+    #         lbl = '_nolegend_'
+    #     else:
+    #         lbl = name
+    #     plotted.add(name)
+    #     if params:
+    #         z = 0
+    #         co = colors[name]
+    #         if len(params) >= 2:
+    #             z = params[1]
+    #         if len(params) >= 3:
+    #             co = params[2]
+    #         ax.scatter(params[0], accuracies[key], z, c = co, label=lbl, marker='o')
+    #     else:
+    #         ax.axhline(y=accuracies[key], color=colors[name], label=lbl, linestyle='-')
+    #
+    # ax.legend()
+    # plt.show()
 
