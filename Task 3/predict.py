@@ -37,7 +37,7 @@ for run in range(num_runs):
     # Build NN
     act = 'relu'    # Activation function
     dropP = 0.3     # Dropout probability
-    num_layers = 1 # Number of hidden layers
+    num_layers = 20 # Number of hidden layers
     num_nodes = 200 # Number of nodes at each layer
 
     NN = Sequential()
@@ -62,7 +62,7 @@ for run in range(num_runs):
 
     # Train NN
     batch_size = 32 # Number of batches used for SGD
-    epochs = 1     # Number of passes through data
+    epochs = 20     # Number of passes through data
     history = NN.fit(X_train, y_train, 
                         batch_size = batch_size, 
                         epochs = epochs,
