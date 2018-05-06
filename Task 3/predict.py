@@ -72,6 +72,7 @@ for run in range(num_runs):
     # Set best NN
     val_acc = history.history['val_acc'][-1] # Last accuracy score on validation set
     if val_acc > best_score:
+        best_score = val_acc
         best_NN = NN
 
 print("Best validation accuracy score: " + str(best_score))
