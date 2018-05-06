@@ -37,7 +37,7 @@ for run in range(num_runs):
     # Build NN
     act = 'relu'    # Activation function
     dropP = 0.3     # Dropout probability
-    num_layers = 20 # Number of hidden layers
+    num_layers = 10 # Number of hidden layers
     num_nodes = 200 # Number of nodes at each layer
 
     NN = Sequential()
@@ -62,7 +62,7 @@ for run in range(num_runs):
 
     # Train NN
     batch_size = 32 # Number of batches used for SGD
-    epochs = 20     # Number of passes through data
+    epochs = 15     # Number of passes through data
     history = NN.fit(X_train, y_train, 
                         batch_size = batch_size, 
                         epochs = epochs,
@@ -85,20 +85,15 @@ y_test = np.argmax(y_test, axis = 1)
 print(y_test)
 
 # Write results to file
-res_frame = pd.DataFrame(y_test, index = test.index)
-res_frame.to_hdf("res.h5", key = 'res')
+id_res = np.array([test.index]).transpose()
+y_res = np.array([y_test]).transpose()
+res_array = np.concatenate((id_res, y_res), axis = 1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+np.savetxt(
+    'res.csv',
+    res_array,
+    fmt='%d',
+    delimiter=',',
+    header='Id,y',
+    comments=''
+    )
