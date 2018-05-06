@@ -26,7 +26,13 @@ assert(X_test.shape[1] == X_train.shape[1])
 
 y_train = keras.utils.to_categorical(y_train, num_classes)
 
-# TODO: Preprocess data to zero mean, unit variance?
+mean = np.mean(X_train, axis = 0)
+std = np.std(X_train, axis = 0)
+
+for row in range(n_train):
+    X_train[row] = (X_train[row] - mean) / std
+for row in range(n_test):
+    X_test[row] = (X_test[row] - mean) / std
 
 # Train several NN to avoid being stuck at local optimum
 num_runs = 3
