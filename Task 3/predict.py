@@ -50,7 +50,7 @@ for run in range(num_runs):
     NN.name = 'NN' + str(run)
 
     # Input layer
-    NN.add(Dense(num_nodes, activation = act, input_dim = input_dim))
+    NN.add(Dense(num_nodes, activation = act, input_dim = input_dim))       # Init
 
     # Hidden layers
     for l in range(num_layers):

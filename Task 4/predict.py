@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn import preprocessing
 #import keras
 
 train_lbl = pd.read_hdf("train_labeled.h5", "train")
@@ -23,16 +26,24 @@ X_test = test.values.astype('float32')
 
 #y_train_lbl = keras.utils.to_categorical(y_train_lbl, num_classes)
 
-# standardize data
-mean = np.mean(X_train_all, axis = 0)
-std = np.std(X_train_all, axis = 0)
 
-for row in range(n_train_lbl):
-    X_train_lbl[row] = (X_train_lbl[row] - mean) / std
-for row in range(n_train_unlbl):
-    X_train_unlbl[row] = (X_train_unlbl[row] - mean) / std
-for row in range(n_test):
-    X_test[row] = (X_test[row] - mean) / std
+# standardize data
+scaler = preprocessing.StandardScaler().fit(X_train_all)
+scaler.transform(X_train_all)
+scaler.transform(X_train_unlbl)
+scaler.transform(X_train_lbl)
+# mean = np.mean(X_train_all, axis = 0)
+# std = np.std(X_train_all, axis = 0)
+#
+# for row in range(n_train_lbl):
+#     X_train_lbl[row] = (X_train_lbl[row] - mean) / std
+# for row in range(n_train_unlbl):
+#     X_train_unlbl[row] = (X_train_unlbl[row] - mean) / std
+# for row in range(n_test):
+#     X_test[row] = (X_test[row] - mean) / std
+
+if __name__ == "__main__":      # for parallelism under windows
+
 
 
 # # Write results to file
@@ -48,3 +59,28 @@ for row in range(n_test):
 #     header='Id,y',
 #     comments=''
 #     )
+
+
+# kpca = KernelPCA(n_components=2, kernel="linear", fit_inverse_transform=True, n_jobs=-1)
+# X_kpca = kpca.fit_transform(X_train_all)
+#
+# zeros = y_train_lbl == 0
+# ones = y_train_lbl == 1
+# twos = y_train_lbl == 2
+# threes = y_train_lbl == 3
+# fours = y_train_lbl == 4
+# fives = y_train_lbl == 5
+# sixs = y_train_lbl == 6
+# sevens = y_train_lbl == 7
+# eights = y_train_lbl == 8
+# nines = y_train_lbl == 9
+
+#
+# plt.figure()
+# plt.scatter(X_kpca[reds, 0], X_kpca[reds, 1], c="C0",
+#             s=20, edgecolor='k')
+# plt.scatter(X_kpca[blues, 0], X_kpca[blues, 1], c="C1",
+#             s=20, edgecolor='k')
+# plt.title("Projection by KPCA")
+# plt.xlabel("1st principal component in space induced by $\phi$")
+# plt.ylabel("2nd component")
